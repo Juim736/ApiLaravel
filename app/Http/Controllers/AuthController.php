@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\User;
 
 class AuthController extends Controller
 {
@@ -14,7 +16,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login','registration']]);
     }
 
     /**
@@ -85,5 +87,23 @@ class AuthController extends Controller
     {
         $payload = auth()->payload();
         return response()->json($payload);
+    }
+    public function registration(Request $request)
+    {
+        $this->validate($request,[
+            'name' => 'required|string|max:100',
+            'email' => 'required|string|email|unique:users',
+            'password' => 'required|string|min:8'
+        ]);
+        $password = Hash::make($request->password);
+        $usrObj = new User();
+        $usrObj->name = $request->name;
+        $usrObj->email = $request->email;
+        $usrObj->password = $password;
+        $userInsert = $usrObj->save();
+        if($userInsert) {
+            return response()->json(['message' => 'Regisration Successfully']);
+        }
+        return response()->json(['message' => 'Something is wrong'],400);
     }
 }
