@@ -30,3 +30,10 @@ Route::group([
     Route::post('payload', 'AuthController@payload');
 
 });
+Route::group([
+    'prefix' => 'team',
+    'middleware' => 'jwt.auth'
+], function () {
+    Route::get('teams', 'TeamController@teams');
+
+});
